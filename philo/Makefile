@@ -6,13 +6,14 @@
 #    By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/06/11 18:23:16 by ael-azra          #+#    #+#              #
-#    Updated: 2021/06/11 18:47:49 by ael-azra         ###   ########.fr        #
+#    Updated: 2021/06/14 17:14:04 by ael-azra         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
 
 SRC =	./file/main.c \
+		./file/read_input.c \
 
 FLAG = -Wall -Wextra -Werror
 

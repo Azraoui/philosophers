@@ -6,7 +6,7 @@
 /*   By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 18:35:40 by ael-azra          #+#    #+#             */
-/*   Updated: 2021/06/12 17:26:26 by ael-azra         ###   ########.fr       */
+/*   Updated: 2021/06/14 17:14:36 by ael-azra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,5 +28,7 @@ typedef struct	s_input
 	int	time_to_sleep;
 	int	number_of_time_to_eat;
 }				t_input;
+
+t_input		*read_input(int ac, char *av[]);
 
 #endif
