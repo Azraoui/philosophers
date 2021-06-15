@@ -6,7 +6,7 @@
 /*   By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 17:09:56 by ael-azra          #+#    #+#             */
-/*   Updated: 2021/06/14 17:16:33 by ael-azra         ###   ########.fr       */
+/*   Updated: 2021/06/15 12:44:20 by ael-azra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,8 @@ int	strtoint(char *str, int *status)
 	sign = 1;
 	if (str[i] == '-')
 	{
-        *status = 1;
-        return (0);
+		*status = 1;
+		return (0);
 	}
 	while (i < len)
 	{
@@ -48,21 +48,22 @@ int	strtoint(char *str, int *status)
 	return (res * sign);
 }
 
-t_input *cheack_error(int ac, char *av[], t_input **input)
+t_input	*cheack_error(int ac, char *av[], t_input **input)
 {
 	int	i;
-    int status;
+	int	status;
 
 	i = 1;
+	status = 0;
 	while (i < ac)
 	{
-		strtoint(av[    i], &status);
-        if (status)
-        {
-            free(*input);
-            return (NULL);
-        }
-        i++;
+		strtoint(av[i], &status);
+		if (status)
+		{
+			free(*input);
+			return (NULL);
+		}
+		i++;
 	}
 	return (*input);
 }
