@@ -6,7 +6,7 @@
 /*   By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 17:09:56 by ael-azra          #+#    #+#             */
-/*   Updated: 2021/06/15 12:44:20 by ael-azra         ###   ########.fr       */
+/*   Updated: 2021/06/25 14:59:25 by ael-azra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,8 @@ t_input	*read_input(int ac, char *av[])
 	t_input	*input;
 
 	input = (t_input *)malloc(sizeof(t_input));
+	if (!input)
+		return (NULL);
 	input->number_of_philo = atoi(av[1]);
 	input->time_to_die = atoi(av[2]);
 	input->time_to_eat = atoi(av[3]);
