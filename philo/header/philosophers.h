@@ -6,7 +6,7 @@
 /*   By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 18:35:40 by ael-azra          #+#    #+#             */
-/*   Updated: 2021/06/26 16:55:12 by ael-azra         ###   ########.fr       */
+/*   Updated: 2021/06/27 12:47:25 by ael-azra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,15 +31,14 @@ typedef struct s_input
 
 typedef	struct	s_philos
 {
-	char	*forks;
-	int		nbr_fork;
 	int		philo_id;
 	int		time_to_die;
 	int		time_to_eat;
 	int		time_to_sleep;
 	int		number_of_philo;
 	int		number_of_time_to_eat;
-	pthread_mutex_t	mutex;
+	pthread_mutex_t	*mutex;
+	pthread_mutex_t	mutex_thread;
 }				t_philos;
 
 t_input	*read_input(int ac, char *av[]);

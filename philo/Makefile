@@ -6,7 +6,7 @@
 #    By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/06/11 18:23:16 by ael-azra          #+#    #+#              #
-#    Updated: 2021/06/15 15:19:21 by ael-azra         ###   ########.fr        #
+#    Updated: 2021/06/27 12:49:08 by ael-azra         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,7 @@ FLAG = -Wall -Wextra -Werror
 all: $(NAME)
 
 $(NAME):
-	@gcc $(FLAG) $(SRC) -o $(NAME)
+	@gcc $(FLAG) $(SRC) -o $(NAME) -g
 
 clean:
 	@echo "Nothing to clean!"
