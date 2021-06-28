@@ -6,73 +6,90 @@
 /*   By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 18:34:37 by ael-azra          #+#    #+#             */
-/*   Updated: 2021/06/27 14:53:30 by ael-azra         ###   ########.fr       */
+/*   Updated: 2021/06/28 12:43:15 by ael-azra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../header/philosophers.h"
 
-void	*do_action(void *s)
+t_philos	*fill_philos(t_input *input)
 {
-	t_philos *philo;
+	t_philos		*philos;
+	pthread_mutex_t	*mutex;
+	t_shared_info	*shared_info;
+	int				i;
 
-	philo = ((t_philos *)s);
-	pthread_mutex_lock(&philo->mutex_thread);
-	if (philo->philo_id == 0)
+	shared_info = (t_shared_info *)malloc(sizeof(t_shared_info));
+	mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * input->number_of_philo);
+	philos = (t_philos *)malloc(sizeof(t_philos) * input->number_of_philo);
+	if (!philos || !shared_info || !mutex)
+		return (NULL);
+	i = 0;
+	shared_info->fork_mutex = mutex;
+	while (i < input->number_of_philo)
 	{
-		pthread_mutex_lock(&philo->mutex[philo->philo_id]);
-		printf("first fork, %d\n", philo->philo_id);
-		pthread_mutex_lock(&philo->mutex[philo->number_of_philo - 1]);
-		printf("second fork, %d\n", philo->philo_id);
+		philos[i].philo_id = i;
+		philos[i].time_to_die = input->time_to_die;
+		philos[i].time_to_eat = input->time_to_eat;
+		philos[i].time_to_sleep = input->time_to_sleep;
+		philos[i].number_of_philo = input->number_of_philo;
+		philos[i].number_of_time_to_eat = input->number_of_time_to_eat;
+		philos[i].shared_info = shared_info;
+		i++;
 	}
-	else if (philo->philo_id == 1)
-	{
-		pthread_mutex_lock(&philo->mutex[philo->philo_id]);
-		printf("first fork, %d\n", philo->philo_id);
-		pthread_mutex_lock(&philo->mutex[philo->philo_id - 1]);
-		printf("second fork, %d\n", philo->philo_id);
-	}
-	pthread_mutex_unlock(&philo->mutex_thread);
+	return (philos);
+}
+
+void	*spaghetti_table(void *tmp)
+{
+	t_philos	*philos;
+
+	philos = (t_philos *)tmp;
+	if (philos->philo_id % 2)
+		usleep(500);
+	pthread_mutex_lock(&philos->shared_info->fork_mutex[philos->philo_id]);
+	printf("%d: tacke fork 1\n", philos->philo_id);
+	pthread_mutex_lock(&philos->shared_info->fork_mutex[(philos->philo_id + 1) % philos->number_of_philo]);
+	printf("%d: tacke fork 2\n", philos->philo_id);
+	// pthread_mutex_unlock(&philos->shared_info->fork_mutex[philos->philo_id]);
+	// pthread_mutex_unlock(&philos->shared_info->fork_mutex[(philos->philo_id + 1) % philos->number_of_philo]);
 	return (NULL);
+}
+
+int	create_philo_threads(int size, t_philos *philos)
+{
+	int		i;
+	pthread_t		*philo_threads;
+
+	philo_threads = (pthread_t *)malloc(sizeof(pthread_t) * size);
+	if (!philo_threads)
+		return (1);
+	i = 0;
+	while (i < size)
+	{
+		if (pthread_create(&philo_threads[i], NULL, spaghetti_table, &philos[i]))
+			return (1);
+		i++;
+	}
+	i = 0;
+	while (i < size)
+		if (pthread_join(philo_threads[i++], NULL))
+			return (1);
+	return (0);
 }
 
 void	threads_philo(t_input *input)
 {
-	int			i;
-	t_philos	*philo;
-	pthread_t	*pthread_philo;
-	pthread_mutex_t *forks;
-	pthread_mutex_t f;
+	t_philos		*philos;
 
-	pthread_philo = (pthread_t *)malloc(sizeof(pthread_t) * input->number_of_philo);
-	philo = (t_philos *)malloc(sizeof(t_philos) * input->number_of_philo);
-	pthread_mutex_init(&f, NULL);
-	forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * input->number_of_philo);
-	// pthread_mutex_init(forks, NULL);
-	i = 0;
-	while (i < input->number_of_philo)
-		pthread_mutex_init(&forks[i++], NULL);
-	i = 0;
-	while (i < input->number_of_philo)
-	{
-		philo[i].philo_id = i;
-		philo[i].number_of_philo = input->number_of_philo;
-		philo[i].mutex = forks;
-		philo[i].mutex_thread = f;
-		i++;
-	}
-	i = 0;
-	while (i < input->number_of_philo)
-	{
-		pthread_create(&pthread_philo[i], NULL, do_action, &philo[i]);
-		i++;
-	}
-	i = 0;
-	while (i < input->number_of_philo)
-		pthread_join(pthread_philo[i++], NULL);
-	i = 0;
-	pthread_mutex_destroy(forks);
-	pthread_mutex_destroy(&f);
+	philos = fill_philos(input);
+	if (!philos)
+		return ;
+	for (int i = 0; i < input->number_of_philo; i++)
+		pthread_mutex_init(&philos->shared_info->fork_mutex[i], NULL);
+	create_philo_threads(input->number_of_philo, philos);
+	for (int i = 0; i < input->number_of_philo; i++)
+		pthread_mutex_destroy(&philos->shared_info->fork_mutex[i]);
 }
 
 int	main(int ac, char *av[])
