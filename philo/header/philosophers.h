@@ -6,7 +6,7 @@
 /*   By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 18:35:40 by ael-azra          #+#    #+#             */
-/*   Updated: 2021/06/28 08:03:35 by ael-azra         ###   ########.fr       */
+/*   Updated: 2021/07/01 08:34:07 by ael-azra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ typedef struct s_input
 
 typedef struct	s_shared_info
 {
+	int				philo_die;
 	pthread_mutex_t	*fork_mutex;
 	pthread_mutex_t	wait_mutex;
 }				t_shared_info;
