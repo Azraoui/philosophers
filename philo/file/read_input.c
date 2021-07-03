@@ -6,7 +6,7 @@
 /*   By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 17:09:56 by ael-azra          #+#    #+#             */
-/*   Updated: 2021/07/01 13:10:31 by ael-azra         ###   ########.fr       */
+/*   Updated: 2021/07/02 10:20:43 by ael-azra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ t_input	*read_input(int ac, char *av[])
 	input->time_to_die = atoi(av[2]);
 	input->time_to_eat = atoi(av[3]);
 	input->time_to_sleep = atoi(av[4]);
-	input->number_of_time_to_eat = 0;
+	input->number_of_time_to_eat = -1;
 	if (ac == 6)
 		input->number_of_time_to_eat = atoi(av[5]);
 	return (cheack_error(ac, av, &input));

@@ -6,7 +6,7 @@
 /*   By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 18:34:37 by ael-azra          #+#    #+#             */
-/*   Updated: 2021/07/01 13:12:24 by ael-azra         ###   ########.fr       */
+/*   Updated: 2021/07/02 10:58:34 by ael-azra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,14 +81,12 @@ void	*spaghetti_table(void *tmp)
 {
 	t_philos	*philos;
 	struct	timeval t_val;
-	int			i;
 
 	philos = (t_philos *)tmp;
 	gettimeofday(&t_val, NULL);
 	if (philos->philo_id % 2)
 		usleep(500);
-	i = 0;
-	while (!philos->shared_info->philo_die)
+	while (!philos->shared_info->philo_die && philos->number_of_time_to_eat)
 	{
 		pthread_mutex_lock(&philos->shared_info->fork_mutex[philos->philo_id]);
 		printf("%d: %d has taken a fork\n", gettime(t_val), philos->philo_id);
@@ -101,7 +99,8 @@ void	*spaghetti_table(void *tmp)
 		printf("%d: %d is sleeping\n", gettime(t_val), philos->philo_id);
 		usleep(philos->time_to_sleep * 1000);
 		printf("%d: %d is thinking\n", gettime(t_val), philos->philo_id);
-		i++;
+		if (philos->number_of_time_to_eat != -1)
+			philos->number_of_time_to_eat--;
 	}
 	return (NULL);
 }
@@ -131,15 +130,16 @@ int	create_philo_threads(int size, t_philos *philos)
 void	threads_philo(t_input *input)
 {
 	t_philos		*philos;
+	int				i;
 
 	philos = fill_philos(input);
 	if (!philos)
 		return ;
-	for (int i = 0; i < input->number_of_philo; i++)
-		pthread_mutex_init(&philos->shared_info->fork_mutex[i], NULL);
+	while (i < input->number_of_philo)
+		pthread_mutex_init(&philos->shared_info->fork_mutex[i++], NULL);
 	create_philo_threads(input->number_of_philo, philos);
-	for (int i = 0; i < input->number_of_philo; i++)
-		pthread_mutex_destroy(&philos->shared_info->fork_mutex[i]);
+	while (i < input->number_of_philo)
+		pthread_mutex_destroy(&philos->shared_info->fork_mutex[i++]);
 	pthread_mutex_destroy(&philos->shared_info->wait_mutex);
 }
 
