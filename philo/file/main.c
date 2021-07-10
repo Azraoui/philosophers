@@ -6,7 +6,7 @@
 /*   By: ael-azra <ael-azra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/11 18:34:37 by ael-azra          #+#    #+#             */
-/*   Updated: 2021/07/02 10:58:34 by ael-azra         ###   ########.fr       */
+/*   Updated: 2021/07/10 14:59:57 by ael-azra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,61 +44,57 @@ t_philos	*fill_philos(t_input *input)
 	return (philos);
 }
 
-unsigned int gettime(struct timeval t_val)
+unsigned int gettime(struct timeval time_zero)
 {
-	unsigned int	time;
+	unsigned int		time;
 	unsigned long long	s;
-	struct	timeval	t_vl;
+	struct timeval		last_time;
 
-	gettimeofday(&t_vl, NULL);
-	s = (t_vl.tv_sec - t_val.tv_sec) * 1000;
-	time = ((t_vl.tv_usec - t_val.tv_usec) / 1000) + s;
+	gettimeofday(&last_time, NULL);
+	s = (last_time.tv_sec - time_zero.tv_sec) * 1000;
+	time = ((last_time.tv_usec - time_zero.tv_usec) / 1000) + s;
 	return (time);
 }
 
-void	ft_usleep(unsigned int time)
+void	lock_fork(pthread_mutex_t *fork, unsigned int time, int philo_id)
 {
-	unsigned int	s;
-	unsigned int	s1;
-	struct			timeval t_vl1;
-	struct			timeval t_vl2;
-
-	gettimeofday(&t_vl2, NULL);
-	usleep(time / (1.1));
-	gettimeofday(&t_vl1, NULL);
-	s = (t_vl1.tv_sec - t_vl2.tv_sec) * 1000;
-	s1 = ((t_vl1.tv_usec - t_vl2.tv_usec) / 1000) + s;
-	printf("s1 = %d\n", s1);
-	while (s1 != time)
-	{
-		gettimeofday(&t_vl1, NULL);
-		s = (t_vl1.tv_sec - t_vl2.tv_sec) * 1000;
-		s1 = ((t_vl1.tv_usec - t_vl2.tv_usec) / 1000) + s;
-	}
+	pthread_mutex_lock(fork);
+	printf("%d: %d has taken a fork\n", time, philo_id);
 }
 
 void	*spaghetti_table(void *tmp)
 {
-	t_philos	*philos;
-	struct	timeval t_val;
+	t_philos		*philos;
+	struct	timeval first_time;
+	unsigned int	die;
 
 	philos = (t_philos *)tmp;
-	gettimeofday(&t_val, NULL);
+	die = 0;
+	gettimeofday(&first_time, NULL);
 	if (philos->philo_id % 2)
 		usleep(500);
-	while (!philos->shared_info->philo_die && philos->number_of_time_to_eat)
+	while (philos->number_of_time_to_eat)
 	{
-		pthread_mutex_lock(&philos->shared_info->fork_mutex[philos->philo_id]);
-		printf("%d: %d has taken a fork\n", gettime(t_val), philos->philo_id);
-		pthread_mutex_lock(&philos->shared_info->fork_mutex[(philos->philo_id + 1) % philos->number_of_philo]);
-		printf("%d: %d has taken a fork\n", gettime(t_val), philos->philo_id);
-		printf("%d: %d is eating\n", gettime(t_val), philos->philo_id);
+		if (gettime(first_time) - (unsigned int)die > (unsigned int)philos->time_to_die)
+		{
+			printf("%d: %d died\n", gettime(first_time), philos->philo_id);
+			philos->shared_info->philo_die = 1;
+			exit(1);
+		}
+		lock_fork(&philos->shared_info->fork_mutex[philos->philo_id], gettime(first_time), philos->philo_id);
+		lock_fork(&philos->shared_info->fork_mutex[(philos->philo_id + 1) % philos->number_of_philo], gettime(first_time), philos->philo_id);
+		// pthread_mutex_lock(&philos->shared_info->fork_mutex[philos->philo_id]);
+		// printf("%d: %d has taken a fork\n", gettime(t_val), philos->philo_id);
+		// pthread_mutex_lock(&philos->shared_info->fork_mutex[(philos->philo_id + 1) % philos->number_of_philo]);
+		// printf("%d: %d has taken a fork\n", gettime(t_val), philos->philo_id);
+		printf("%d: %d is eating\n", gettime(first_time), philos->philo_id);
 		usleep(philos->time_to_eat * 1000);
+		die = gettime(first_time);
 		pthread_mutex_unlock(&philos->shared_info->fork_mutex[philos->philo_id]);
 		pthread_mutex_unlock(&philos->shared_info->fork_mutex[(philos->philo_id + 1) % philos->number_of_philo]);
-		printf("%d: %d is sleeping\n", gettime(t_val), philos->philo_id);
+		printf("%d: %d is sleeping\n", gettime(first_time), philos->philo_id);
 		usleep(philos->time_to_sleep * 1000);
-		printf("%d: %d is thinking\n", gettime(t_val), philos->philo_id);
+		printf("%d: %d is thinking\n", gettime(first_time), philos->philo_id);
 		if (philos->number_of_time_to_eat != -1)
 			philos->number_of_time_to_eat--;
 	}
@@ -135,6 +131,7 @@ void	threads_philo(t_input *input)
 	philos = fill_philos(input);
 	if (!philos)
 		return ;
+	i = 0;
 	while (i < input->number_of_philo)
 		pthread_mutex_init(&philos->shared_info->fork_mutex[i++], NULL);
 	create_philo_threads(input->number_of_philo, philos);
